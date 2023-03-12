@@ -1,0 +1,78 @@
+- name: deploy
+  hosts: test8
+  gather_facts: false
+  become: false
+
+  tasks:
+
+    - name: create log file for php-mail
+      file:
+        path: "/var/log/phpmail.log"
+        state: touch
+        owner: apache
+        group: apache
+        mode: "u=rw,g=rw,o=r"
+
+    - name: create log file for slow query of mariadb
+      file:
+        path: "/var/log/mariadb/slow-query.log"
+        state: touch
+        owner: mysql
+        group: mysql
+        mode: "u=rw,g=r,o=r"
+
+    - name: copy configs to server
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+      loop:
+        - {src: '../configs/default.conf', dest: '/etc/nginx/conf.d/'}
+        - {src: '../configs/httpd.conf', dest: '/etc/httpd/conf/'}
+        - {src: '../configs/test8.clo.southbridge.ru.conf', dest: '/etc/httpd/conf.d/'}
+        - {src: '../configs/php.conf', dest: '/etc/httpd/conf.d/'}
+        - {src: '../configs/my.cnf', dest: '/etc/'}
+        - {src: '../configs/memcached', dest: '/etc/sysconfig/'}
+        - {src: '../configs/php.ini', dest: '/etc/'}
+        - {src: '../configs/www.conf', dest: '/etc/php-fpm.d/'}
+
+      notify:
+        - Restart php-fpm
+        - Restart mariadb
+        - Restart memcached
+        - Restart httpd
+        - Restart nginx
+
+
+  handlers:
+
+    - name: Restart php-fpm
+      service:
+        name: php-fpm
+        state: restarted
+        enabled: true
+
+    - name: Restart mariadb
+      service:
+        name: mariadb
+        state: restarted
+        enabled: true
+
+    - name: Restart memcached
+      service:
+        name: memcached
+        state: restarted
+        enabled: true
+
+    - name: Restart httpd
+      service:
+        name: httpd
+        state: restarted
+        enabled: true
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: true

@@ -1,0 +1,33 @@
+- name: create users && set permissions
+  hosts: test8
+  gather_facts: false
+  become: false
+
+  tasks:
+
+    - name: create dev group
+      group:
+        name: develops
+        state: present
+
+    - name: create first developers
+      user:
+        name: dev1
+        shell: "/bin/bash"
+        groups: "develops"
+        append: true
+        comment: "Developer with full access site directory"
+
+    - name: create second developers
+      user:
+        name: dev2
+        shell: "/bin/bash"
+        comment: "Developer with ro access site directory"
+
+    - name: set permissions on site directory
+      file:
+        path: "/var/www/html/test8"
+        state: directory
+        owner: apache
+        group: develops
+        mode: "u=rwx,g=rwx,o=rx"

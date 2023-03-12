@@ -1,0 +1,42 @@
+- name: preconfig host
+  hosts: test8
+  gather_facts: true
+  become: false
+
+  tasks:
+
+    - name: install repo
+      yum_repository:
+        name: southbridge
+        description: southbridge yum repo
+        file: southbridge-stable
+        gpgkey: "http://rpms.southbridge.ru/RPM-GPG-KEY-southbridge"
+        baseurl: "http://rpms.southbridge.ru/rhel$releasever/stable/$basearch"
+        sslverify: false
+        cost: "9999"
+
+    - name: install needed packages
+      yum:
+        name:
+          - epel-release
+          - httpd
+          - php
+          - php-fpm
+          - php-common
+          - php-PHPMailer
+          - crypto-utils 
+          - openssl
+          - mod_ssl
+          - mariadb-server
+          - php-mysql
+          - php-mysqli
+          - memcached
+          - php-pecl-memcache
+          - libmemcached
+          - nginx
+          - git
+        state: latest
+        update_cache: true
+
+
+        
